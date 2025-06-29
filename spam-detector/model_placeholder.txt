@@ -1,0 +1,17 @@
+# Placeholder for logistic regression model
+# This file will be created when you train your spam detection model
+# 
+# To create this file, you would typically:
+# 1. Load and preprocess your email dataset
+# 2. Train a LogisticRegression model
+# 3. Save the trained model using pickle
+#
+# Example training code:
+# import pickle
+# from sklearn.linear_model import LogisticRegression
+# 
+# # After training your model...
+# with open('logistic_model.pkl', 'wb') as f:
+#     pickle.dump(trained_model, f)
+
+# This is a placeholder file - replace with actual trained model

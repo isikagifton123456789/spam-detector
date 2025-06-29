@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Spam Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shield-alt"></i> Email Spam Detector</h1>
+            <p>Analyze your emails to detect spam using machine learning</p>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section">
+                <label for="email-text">
+                    <i class="fas fa-envelope"></i> Enter Email Content
+                </label>
+                <textarea 
+                    id="email-text" 
+                    placeholder="Paste your email content here..."
+                    rows="10"
+                ></textarea>
+                
+                <button id="analyze-btn" class="analyze-btn">
+                    <i class="fas fa-search"></i> Analyze Email
+                </button>
+                
+                <button id="clear-btn" class="clear-btn">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+            </div>
+
+            <div class="result-section" id="result-section">
+                <div class="result-card" id="result-card">
+                    <div class="result-header">
+                        <h2>Analysis Result</h2>
+                    </div>
+                    <div class="result-content" id="result-content">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Analyzing email...</p>
+            </div>
+
+            <div class="error-message" id="error-message">
+                <!-- Error messages will be displayed here -->
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Email Spam Detector. Built with Flask and Machine Learning.</p>
+        </footer>
+    </div>
+
+    <script>
+        const emailTextarea = document.getElementById('email-text');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultSection = document.getElementById('result-section');
+        const resultContent = document.getElementById('result-content');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+
+        analyzeBtn.addEventListener('click', analyzeEmail);
+        clearBtn.addEventListener('click', clearForm);
+
+        async function analyzeEmail() {
+            const emailText = emailTextarea.value.trim();
+            
+            if (!emailText) {
+                showError('Please enter some email content to analyze.');
+                return;
+            }
+
+            showLoading();
+            hideError();
+            hideResult();
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email_text: emailText
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'An error occurred');
+                }
+
+                showResult(data);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showResult(data) {
+            const isSpam = data.is_spam;
+            const confidence = (data.confidence * 100).toFixed(2);
+            const prediction = data.prediction;
+
+            resultContent.innerHTML = `
+                <div class="result-item ${isSpam ? 'spam' : 'not-spam'}">
+                    <div class="result-icon">
+                        <i class="fas ${isSpam ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                    </div>
+                    <div class="result-details">
+                        <h3>${prediction}</h3>
+                        <p class="confidence">Confidence: ${confidence}%</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidence}%"></div>
+                        </div>
+                        ${data.detected_patterns && data.detected_patterns.length > 0 ? 
+                            `<div class="detected-patterns">
+                                <h4>Detected Spam Patterns:</h4>
+                                <ul>
+                                    ${data.detected_patterns.map(pattern => `<li>${pattern}</li>`).join('')}
+                                </ul>
+                            </div>` : ''
+                        }
+                    </div>
+                </div>
+            `;
+            
+            resultSection.style.display = 'block';
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.innerHTML = `
+                <div class="error-content">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function hideResult() {
+            resultSection.style.display = 'none';
+        }
+
+        function clearForm() {
+            emailTextarea.value = '';
+            hideResult();
+            hideError();
+        }
+    </script>
+</body>
+</html>
