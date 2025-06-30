@@ -134,3 +134,45 @@ The included `train_model.py` script uses your actual spam.csv dataset. To train
 - Add batch processing capabilities
 - Include email attachment scanning
 - Add user feedback system for model improvement
+
+## Model Analysis and Comparison
+
+The project includes a comprehensive Jupyter notebook `mail_spam.ipynb` that performs an in-depth analysis of various machine learning models for spam detection:
+
+### Models Evaluated
+- Logistic Regression
+- Multinomial Naive Bayes
+- Gaussian Naive Bayes
+- Support Vector Machines (SVM)
+- Decision Trees
+- Random Forests
+- Gradient Boosting
+- XGBoost
+
+### Analysis Features
+- Data preprocessing and cleaning
+- Text vectorization using CountVectorizer
+- Model training and evaluation
+- Performance comparison using:
+  - Accuracy scores
+  - Precision scores
+  - Confusion matrices
+  - Classification reports
+- Visualization of results using matplotlib
+- Word clouds for spam vs. ham analysis
+
+### Key Findings
+- Logistic Regression emerged as the top performer
+- Model saves the best performing model (logistic_model.pkl)
+- Includes preprocessing pipeline for text normalization
+
+### Using the Notebook
+1. Open `mail_spam.ipynb` in Jupyter Notebook or VS Code
+2. Run cells sequentially to:
+   - Load and preprocess the dataset
+   - Train multiple models
+   - Compare performance metrics
+   - Generate visualizations
+   - Save the best model
+
+The notebook provides valuable insights into model selection and performance optimization for spam detection.
