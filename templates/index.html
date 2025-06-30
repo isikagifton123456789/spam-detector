@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Spam Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Email Spam Detector</h1>
+        <form method="POST" action="/" class="form">
+            <div class="form-group">
+                <label for="email_text">Enter email text:</label>
+                <textarea name="email_text" id="email_text" rows="10" required>{{ email_text if email_text }}</textarea>
+            </div>
+            <button type="submit" class="submit-btn">Check for Spam</button>
+        </form>
+        {% if prediction is not none %}
+        <div class="result {% if prediction == 1 %}spam{% else %}ham{% endif %}">
+            <h2>Result:</h2>
+            <p class="prediction">This email is {% if prediction == 1 %}SPAM{% else %}NOT SPAM{% endif %}</p>
+            {% if spam_score is not none %}
+            <p class="score">Spam Score: {{ "%.2f"|format(spam_score) }}</p>
+            {% endif %}
+            {% if triggered_rules %}
+            <div class="rules">
+                <h3>Triggered Rules:</h3>
+                <ul>
+                {% for rule in triggered_rules %}
+                    <li>{{ rule }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
