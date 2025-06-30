@@ -261,9 +261,13 @@ def rule_based_spam_detection(text):
 @app.route('/')
 def index():
     """
-    Render the main page
+    Render the main page with default values
     """
-    return render_template('index.html')
+    return render_template('index.html', 
+                         prediction=None, 
+                         spam_score=None, 
+                         triggered_rules=None, 
+                         email_text=None)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -319,5 +323,13 @@ def predict():
 
 if __name__ == '__main__':
     import os
+    
+    # Enable debug mode for development
+    app.debug = True
+    
+    # Check if model files exist
+    if not os.path.exists('logistic_model.pkl') or not os.path.exists('count_vectorizer.pkl'):
+        print("Warning: Model files are missing! Please run train_model.py first.")
+    
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)

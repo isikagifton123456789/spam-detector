@@ -5,36 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Spam Detector</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function checkSpam(event) {
+            event.preventDefault();
+            const emailText = document.getElementById('email_text').value;
+            
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email_text: emailText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <h2>Result:</h2>
+                    <p class="prediction">This email is ${data.prediction}</p>
+                    <p class="score">Confidence: ${(data.confidence * 100).toFixed(2)}%</p>
+                    ${data.detected_patterns && data.detected_patterns.length > 0 ? `
+                        <div class="rules">
+                            <h3>Detected Patterns:</h3>
+                            <ul>
+                                ${data.detected_patterns.map(pattern => `<li>${pattern}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+                resultDiv.className = `result ${data.is_spam ? 'spam' : 'ham'}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `
+                    <div class="error">An error occurred while processing your request.</div>
+                `;
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Email Spam Detector</h1>
-        <form method="POST" action="/" class="form">
+        <form onsubmit="checkSpam(event)" class="form">
             <div class="form-group">
                 <label for="email_text">Enter email text:</label>
                 <textarea name="email_text" id="email_text" rows="10" required>{{ email_text if email_text }}</textarea>
             </div>
             <button type="submit" class="submit-btn">Check for Spam</button>
         </form>
-        {% if prediction is not none %}
-        <div class="result {% if prediction == 1 %}spam{% else %}ham{% endif %}">
-            <h2>Result:</h2>
-            <p class="prediction">This email is {% if prediction == 1 %}SPAM{% else %}NOT SPAM{% endif %}</p>
-            {% if spam_score is not none %}
-            <p class="score">Spam Score: {{ "%.2f"|format(spam_score) }}</p>
-            {% endif %}
-            {% if triggered_rules %}
-            <div class="rules">
-                <h3>Triggered Rules:</h3>
-                <ul>
-                {% for rule in triggered_rules %}
-                    <li>{{ rule }}</li>
-                {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
+        <div id="result"></div>
     </div>
 </body>
 </html>
